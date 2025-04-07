@@ -12,8 +12,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks:
-      - tasktracker-net
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
@@ -29,9 +27,18 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
-    networks:
-      - tasktracker-net
     restart: always
+
+  migrations:
+    image: migrate/migrate:latest
+    container_name: tasktracker-migrations
+    depends_on:
+      - postgres
+    volumes:
+      - ./migrations:/migrations
+      - ./wait-for-postgres.sh:/wait-for-postgres.sh
+    entrypoint: sh -c "/wait-for-postgres.sh postgres 5432 migrate -path /migrations -database 'postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable' up"
+    restart: "no"
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
@@ -50,8 +57,6 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-    networks:
-      - tasktracker-net
     restart: always
 
   tracker:
@@ -76,8 +81,7 @@ services:
     depends_on:
       - postgres
       - kafka
-    networks:
-      - tasktracker-net
+      - migrations
     restart: always
 
   frontend:
@@ -89,8 +93,6 @@ services:
       - "80:80"
     depends_on:
       - tracker
-    networks:
-      - tasktracker-net
     restart: always
 
   scheduler:
@@ -110,8 +112,7 @@ services:
     depends_on:
       - postgres
       - kafka
-    networks:
-      - tasktracker-net
+      - migrations
     restart: always
 
   emailsender:
@@ -130,8 +131,6 @@ services:
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
     depends_on:
       - kafka
-    networks:
-      - tasktracker-net
     restart: always
 
 networks:
