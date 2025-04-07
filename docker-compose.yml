@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tasktracker-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - tasktracker-net
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: tasktracker-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - tasktracker-net
+    restart: always
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: tasktracker-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - tasktracker-net
+    restart: always
+
+  tracker:
+    build:
+      context: ./tracker
+      dockerfile: Dockerfile
+    container_name: tasktracker-tracker
+    ports:
+      - "8080:8080"
+    environment:
+      - SKIP_ENV_LOAD=${SKIP_ENV_LOAD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
+      - KAFKA_TOPIC_EMAIL_SENDING=${KAFKA_TOPIC_EMAIL_SENDING}
+      - BACKEND_HTTP_PORT=${BACKEND_HTTP_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - PASS_SECRET=${PASS_SECRET}
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - tasktracker-net
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tasktracker-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - tracker
+    networks:
+      - tasktracker-net
+    restart: always
+
+  scheduler:
+    build:
+      context: ./scheduler
+      dockerfile: Dockerfile
+    container_name: tasktracker-scheduler
+    environment:
+      - SKIP_ENV_LOAD=${SKIP_ENV_LOAD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
+      - KAFKA_TOPIC_EMAIL_SENDING=${KAFKA_TOPIC_EMAIL_SENDING}
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - tasktracker-net
+    restart: always
+
+  emailsender:
+    build:
+      context: ./emailsender
+      dockerfile: Dockerfile
+    container_name: tasktracker-emailsender
+    environment:
+      - SKIP_ENV_LOAD=${SKIP_ENV_LOAD}
+      - KAFKA_BROKERS=${KAFKA_BROKERS}
+      - KAFKA_TOPIC_EMAIL_SENDING=${KAFKA_TOPIC_EMAIL_SENDING}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+    depends_on:
+      - kafka
+    networks:
+      - tasktracker-net
+    restart: always
+
+networks:
+  tasktracker-net:
+    driver: bridge
+
+volumes:
+  postgres-data:

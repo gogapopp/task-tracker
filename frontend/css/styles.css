@@ -1,0 +1,306 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background-color: #f4f7f9;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+h1 {
+    color: #2c3e50;
+}
+
+button {
+    cursor: pointer;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Auth Forms */
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    background-color: #eee;
+    color: #333;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.tab-btn.active {
+    background-color: #3498db;
+    color: white;
+}
+
+.form-container {
+    display: none;
+    background-color: white;
+    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-container.active {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+small {
+    display: block;
+    color: #777;
+    margin-top: 5px;
+}
+
+.error-message {
+    color: #e74c3c;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+#user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#user-email {
+    font-weight: bold;
+}
+
+/* Task Container */
+.task-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-tasks {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-btn {
+    background-color: #eee;
+    color: #333;
+}
+
+.filter-btn.active {
+    background-color: #3498db;
+    color: white;
+}
+
+#add-task-form {
+    background-color: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#cancel-add-task {
+    background-color: #e74c3c;
+}
+
+#cancel-add-task:hover {
+    background-color: #c0392b;
+}
+
+/* Tasks List */
+#tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.task-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.completed {
+    border-left: 4px solid #2ecc71;
+}
+
+.pending {
+    border-left: 4px solid #f39c12;
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.task-title {
+    margin: 0;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.task-actions-btn {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-task {
+    background-color: #f39c12;
+}
+
+.edit-task:hover {
+    background-color: #e67e22;
+}
+
+.delete-task {
+    background-color: #e74c3c;
+}
+
+.delete-task:hover {
+    background-color: #c0392b;
+}
+
+.task-description {
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.task-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.task-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    color: white;
+    font-size: 12px;
+}
+
+.status-completed {
+    background-color: #2ecc71;
+}
+
+.status-pending {
+    background-color: #f39c12;
+}
+
+.no-tasks-message {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-group input {
+    width: auto;
+    margin-right: 10px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    font-weight: normal;
+}
+
+.cancel-btn {
+    background-color: #e74c3c;
+}
+
+.cancel-btn:hover {
+    background-color: #c0392b;
+}
