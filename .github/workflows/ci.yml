@@ -24,12 +24,13 @@ jobs:
 
       - name: Build and push images
         run: |
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
           for service in emailsender frontend scheduler tracker; do
             echo "Building $service..."
             docker buildx build \
               --push \
               --platform linux/amd64 \
-              --tag ${DOCKERHUB_USERNAME}/$service:${GITHUB_SHA} \
+              --tag ${DOCKERHUB_USERNAME}/$service:${SHORT_SHA} \
               --file $service/Dockerfile \
               --build-arg BUILDKIT_INLINE_CACHE=1 \
               .
