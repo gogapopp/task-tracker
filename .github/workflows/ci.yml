@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push images
-        env:  
+        env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
           SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
@@ -35,5 +35,5 @@ jobs:
               --tag ${DOCKERHUB_USERNAME}/$service:${SHORT_SHA} \
               --file $service/Dockerfile \
               --build-arg BUILDKIT_INLINE_CACHE=1 \
-              .
+              $service/  
           done
