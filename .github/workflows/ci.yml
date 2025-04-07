@@ -23,6 +23,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push images
+        env:  
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         run: |
           SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
           for service in emailsender frontend scheduler tracker; do
